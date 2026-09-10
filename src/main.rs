@@ -57,15 +57,6 @@ async fn process_one(
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-    if args
-        .cookie
-        .as_deref()
-        .map(str::trim)
-        .unwrap_or("")
-        .is_empty()
-    {
-        eprintln!("No cookies provided (--cookie or ACADEMIA_COOKIES); anonymous requests will likely get HTTP 403 from Cloudflare.");
-    }
     let client = build_client(args.cookie.as_deref()).unwrap_or_else(|e| {
         eprintln!("{e:?}");
         std::process::exit(1);

@@ -1,38 +1,49 @@
 # academia-dl
 
-Download PDFs from academia dot edu (must login and take the cookies)
+Download PDFs from academia.edu without logging in or creating an account.
 
 ## Usage
 
-Build with [Rust](https://www.rust-lang.org/) 
+Build with [Rust](https://www.rust-lang.org/) (`cargo build --release`)
+then run:
 
-```bash
-cargo build --release
-```
-
-Then run:
 ```bash
 ./target/release/academia-dl "https://www.academia.edu/rest/of/url"
 ```
 
-Multiple URLs are downloaded concurrently:
+Multiple URLs download concurrently, each with its own progress bar:
+
 ```bash
 academia-dl "https://www.academia.edu/url/one" "https://www.academia.edu/url/two"
 ```
 
+Or install once: `cargo install --path .`
+
+Building `wreq` compiles BoringSSL from source — you need a C/C++ toolchain,
+cmake, and `libclang-dev` (`sudo apt install -y libclang-dev build-essential cmake`).
+First build is slow; later builds reuse `target/`.
+
 ## Docker Usage
 
-    docker build -t academia-dl .
-    docker run -ti -v "$(pwd)":/data academia-dl "https://www.academia.edu/rest/of/url"
+```bash
+docker build -t academia-dl .
+docker run -ti -v "$(pwd)":/data academia-dl "https://www.academia.edu/rest/of/url"
+```
 
+## Cookies (optional)
 
-## Cookies (required — Cloudflare + login)
+Not needed in normal use: the client emulates Chrome's TLS fingerprint,
+which is what passes Cloudflare (plain HTTP clients get HTTP 403).
 
-Anonymous downloads are blocked (HTTP 403, Cloudflare challenge, login-gated
-buttons). Steps:
-1. Log in at academia.edu in your browser and open any paper page.
-2. DevTools (F12) → Application → Cookies → https://www.academia.edu.
-3. Copy values of `cf_clearance` (and any `academia.edu_session`-like cookie) as:
-   `cf_clearance=VALUE; other=VALUE`
-4. Run: `academia-dl --cookie "cf_clearance=VALUE; other=VALUE" "https://www.academia.edu/..."`
-   or export once: `export ACADEMIA_COOKIES="cf_clearance=VALUE; other=VALUE"`
+If you ever hit rate limits or a login-gated paper, pass a logged-in
+browser session explicitly:
+
+```bash
+academia-dl --cookie "cf_clearance=VALUE; other=VALUE" "https://www.academia.edu/..."
+# or export once:
+export ACADEMIA_COOKIES="cf_clearance=VALUE; other=VALUE"
+```
+
+To export: DevTools → Network tab → refresh → click the paper request →
+Headers → copy the `Cookie:` value (cookies are HttpOnly, invisible to
+`document.cookie` in the console).

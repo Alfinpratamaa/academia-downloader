@@ -17,21 +17,18 @@ Rust rewrite of an earlier Ruby tool. Design/plan docs in `docs/superpowers/`.
 - Lint: `cargo clippy --all-targets`
 - Docker: `docker build -t academia-dl .` then `docker run -ti -v "$(pwd)":/data academia-dl "<url>"`
 
-## Cookies (required)
+## Cookies (optional)
 
-Anonymous requests get HTTP 403 (Cloudflare managed challenge + login-gated
-downloads). Pass a logged-in browser cookie header via
-`--cookie "cf_clearance=...; __cf_bm=...; _cookie_session=..."` or
-`ACADEMIA_COOKIES` env var. Key cookies: `cf_clearance`, `__cf_bm`,
-`_cookie_session` (+ `login_token`/`user_id` when present).
+Chrome TLS emulation in `wreq` passes Cloudflare on its own — verified live
+with garbage cookies. `--cookie` / `ACADEMIA_COOKIES` still exist as an
+escape hatch (rate limits, login-gated papers). If ever needed, export via
+DevTools → Network tab → copy the `Cookie:` header (cookies are HttpOnly,
+invisible to `document.cookie`). Key ones: `cf_clearance`, `__cf_bm`,
+`_cookie_session` (+ `login_token`/`user_id`). Live tests read
+`ACADEMIA_COOKIES`.
 
-How to export (they are HttpOnly — invisible to `document.cookie` in console):
-DevTools → Network tab → refresh → click the paper request → Headers →
-right-click the `Cookie:` value → Copy value. Paste as one line.
-
-TLS fingerprint matters too: plain reqwest/curl get 403 even with valid
-cookies. The client uses `wreq` with Chrome emulation (`fetch.rs`), which is
-what actually passes Cloudflare. Live tests read `ACADEMIA_COOKIES`.
+Plain reqwest/curl 403 even with valid cookies — the fix was fingerprint
+(`fetch.rs`), never the cookies.
 
 ## Architecture
 

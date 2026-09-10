@@ -16,7 +16,7 @@ Full context in `CLAUDE.md`; design/plan history in `docs/superpowers/`.
 ## Setup gotchas
 
 - `wreq` compiles BoringSSL via `btls-sys`: needs `libclang-dev` + C/C++ toolchain + cmake, or the build fails in bindgen. First build is slow (`target/` caches it).
-- Live runs need `ACADEMIA_COOKIES` (or `--cookie`) from a logged-in browser session. Cookies are HttpOnly — export via DevTools → Network → copy `Cookie:` header, not `document.cookie`.
+- Live runs work anonymously (wreq Chrome emulation passes Cloudflare — verified live). `ACADEMIA_COOKIES` (or `--cookie`) is an optional escape hatch for rate limits / login-gated papers. To export: DevTools → Network → copy `Cookie:` header (`document.cookie` can't see HttpOnly cookies).
 
 ## Order-sensitive / non-obvious
 
