@@ -1,0 +1,20 @@
+[package]
+name = "academia-dl"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "academia-dl"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+wreq = { version = "6.0.0-rc.31", features = ["cookies", "stream"] }
+wreq-util = { version = "3.0.0-rc.14" }
+futures-util = "0.3"
+scraper = "0.24"
+regex = "1"
+url = "2"
+clap = { version = "4", features = ["derive", "env"] }
+anyhow = "1"
+indicatif = "0.17"

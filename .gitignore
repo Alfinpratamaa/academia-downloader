@@ -1,0 +1,8 @@
+*.pdf
+
+
+# Added by cargo
+
+target/
+.playwright-mcp
+docs/
