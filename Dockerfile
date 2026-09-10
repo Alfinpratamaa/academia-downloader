@@ -1,7 +1,7 @@
 FROM rust:1-slim AS builder
 # wreq compiles BoringSSL from source: needs C++ toolchain, cmake, libclang
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential cmake libclang-dev pkg-config \
+    build-essential cmake libclang-dev pkg-config git \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /usr/src/app
 COPY Cargo.toml Cargo.lock ./
