@@ -27,9 +27,12 @@ jobs:
       - name: Package
         run: |
           tar -czf academia-dl-x86_64-unknown-linux-gnu.tar.gz -C target/release academia-dl
+          tar -czf academia-web-x86_64-unknown-linux-gnu.tar.gz -C target/release academia-web
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: academia-dl-x86_64-unknown-linux-gnu.tar.gz
+          files: |
+            academia-dl-x86_64-unknown-linux-gnu.tar.gz
+            academia-web-x86_64-unknown-linux-gnu.tar.gz
           generate_release_notes: true
