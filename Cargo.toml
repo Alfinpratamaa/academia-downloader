@@ -7,6 +7,14 @@ edition = "2021"
 name = "academia-dl"
 path = "src/main.rs"
 
+[[bin]]
+name = "academia-web"
+path = "src/bin/academia-web.rs"
+
+[lib]
+name = "academia_dl"
+path = "src/lib.rs"
+
 [dependencies]
 tokio = { version = "1", features = ["full"] }
 wreq = { version = "6.0.0-rc.31", features = ["cookies", "stream"] }
@@ -18,3 +26,5 @@ url = "2"
 clap = { version = "4", features = ["derive", "env"] }
 anyhow = "1"
 indicatif = "0.17"
+axum = "0.8"
+serde = { version = "1", features = ["derive"] }

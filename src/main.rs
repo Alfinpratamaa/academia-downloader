@@ -1,18 +1,11 @@
-mod download;
-mod fetch;
-mod filename;
-mod parse;
-mod validate;
-
+use academia_dl::download::{download_to_file, download_url};
+use academia_dl::fetch::{build_client, fetch_page_html};
+use academia_dl::filename::filename_from_url;
+use academia_dl::parse::extract_download_id;
+use academia_dl::validate::validate_academia_url;
 use anyhow::Result;
 use clap::Parser;
 use tokio::task::JoinSet;
-
-use download::{download_to_file, download_url};
-use fetch::{build_client, fetch_page_html};
-use filename::filename_from_url;
-use parse::extract_download_id;
-use validate::validate_academia_url;
 
 #[derive(Parser)]
 #[command(
@@ -44,13 +37,13 @@ async fn process_one(
         return Ok(());
     }
     let html = fetch_page_html(client, &url).await?;
-    if let Some(direct) = parse::extract_download_url(&html) {
-        download_to_file(client, mp, &direct, &filename).await?;
+    if let Some(direct) = academia_dl::parse::extract_download_url(&html) {
+        download_to_file(client, Some(mp), None, &direct, &filename).await?;
         return Ok(());
     }
     let download_id = extract_download_id(&html)?;
     let dl_url = download_url(&download_id, &filename);
-    download_to_file(client, mp, &dl_url, &filename).await?;
+    download_to_file(client, Some(mp), None, &dl_url, &filename).await?;
     Ok(())
 }
 
