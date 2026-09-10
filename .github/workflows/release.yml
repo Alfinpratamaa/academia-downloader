@@ -10,7 +10,9 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # ubuntu-22.04 → glibc 2.35: binary runs on 22.04/24.04, Debian 11/12.
+    # (ubuntu-latest links glibc 2.38+, which older distros lack.)
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
