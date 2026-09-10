@@ -1,6 +1,6 @@
 # academia-dl
 
-Download PDFs from academia dot edu without logging in or creating an account.
+Download PDFs from academia dot edu (must login and take the cookies)
 
 ## Usage
 
