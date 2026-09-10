@@ -13,7 +13,8 @@ Rust rewrite of an earlier Ruby tool. Design/plan docs in `docs/superpowers/`.
 - Run: `cargo run -- "https://www.academia.edu/<id>/<slug>"` (multiple URLs → concurrent)
 - Unit tests: `cargo test` (all pure, no network)
 - Single test: `cargo test extracts_primary_script_id` or `cargo test parse::`
-- Live e2e (network, needs working cookies): `cargo test -- --ignored`
+- Live e2e (network, works anonymously; `ACADEMIA_COOKIES` optional): `cargo test -- --ignored`
+- Prerequisites (rustup + C toolchain + cmake + libclang): per-OS list in README Prerequisites
 - Lint: `cargo clippy --all-targets`
 - Docker: `docker build -t academia-dl .` then `docker run -ti -v "$(pwd)":/data academia-dl "<url>"`
 

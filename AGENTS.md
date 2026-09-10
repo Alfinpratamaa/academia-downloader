@@ -9,13 +9,13 @@ Full context in `CLAUDE.md`; design/plan history in `docs/superpowers/`.
 - Build / run: `cargo build` / `cargo run -- "<url>"` (release: `cargo build --release`)
 - Unit tests (pure, no network): `cargo test`
 - Single test: `cargo test <name>` (e.g. `cargo test prefers_id_followed_by_identifier`)
-- Live e2e (network, needs cookies): `cargo test -- --ignored`
+- Live e2e (network, works anonymously): `cargo test -- --ignored`
 - Lint / fmt: `cargo clippy --all-targets -- -D warnings`, `cargo fmt --check`
 - Docker: `docker build -t academia-dl .`, `docker run -ti -v "$(pwd)":/data academia-dl "<url>"`
 
 ## Setup gotchas
 
-- `wreq` compiles BoringSSL via `btls-sys`: needs `libclang-dev` + C/C++ toolchain + cmake, or the build fails in bindgen. First build is slow (`target/` caches it).
+- `wreq` compiles BoringSSL via `btls-sys`: needs rustup + C/C++ toolchain + cmake + libclang (per-OS list in README Prerequisites), or the build fails in bindgen. First build is slow (`target/` caches it).
 - Live runs work anonymously (wreq Chrome emulation passes Cloudflare — verified live). `ACADEMIA_COOKIES` (or `--cookie`) is an optional escape hatch for rate limits / login-gated papers. To export: DevTools → Network → copy `Cookie:` header (`document.cookie` can't see HttpOnly cookies).
 
 ## Order-sensitive / non-obvious
