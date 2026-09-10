@@ -2,6 +2,32 @@
 
 Download PDFs from academia.edu without logging in or creating an account.
 
+## Prerequisites
+
+Install Rust via [rustup](https://rustup.rs/):
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+The HTTP client compiles BoringSSL from source, so you also need a C/C++
+toolchain, cmake, and libclang. First build is slow; later builds reuse `target/`.
+
+```bash
+# Debian / Ubuntu
+sudo apt install -y build-essential cmake libclang-dev
+
+# Fedora
+sudo dnf install -y gcc gcc-c++ make cmake clang-devel
+
+# Arch
+sudo pacman -S base-devel cmake clang
+
+# macOS (libclang ships with Xcode tools)
+xcode-select --install
+brew install cmake
+```
+
 ## Usage
 
 Build with [Rust](https://www.rust-lang.org/) (`cargo build --release`)
@@ -18,10 +44,6 @@ academia-dl "https://www.academia.edu/url/one" "https://www.academia.edu/url/two
 ```
 
 Or install once: `cargo install --path .`
-
-Building `wreq` compiles BoringSSL from source — you need a C/C++ toolchain,
-cmake, and `libclang-dev` (`sudo apt install -y libclang-dev build-essential cmake`).
-First build is slow; later builds reuse `target/`.
 
 ## Docker Usage
 
