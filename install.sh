@@ -45,11 +45,11 @@ install_binary() {
     [ -n "$asset" ] || return 1
     url="https://github.com/$REPO/releases/latest/download/$asset"
     tmp="$(mktemp -d)"
-    trap "rm -rf $tmp" RETURN
     echo "Downloading prebuilt binary ($asset)..."
-    curl -fsSL "$url" -o "$tmp/pkg.tar.gz" || return 1
+    if ! curl -fsSL "$url" -o "$tmp/pkg.tar.gz"; then rm -rf "$tmp"; return 1; fi
     tar -xzf "$tmp/pkg.tar.gz" -C "$tmp"
     install -m 0755 "$tmp/$name" "$dest"
+    rm -rf "$tmp"
     echo "Installed: $("$dest" --version 2>/dev/null || echo "$name")"
     return 0
 }
