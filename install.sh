@@ -45,7 +45,7 @@ install_binary() {
     [ -n "$asset" ] || return 1
     url="https://github.com/$REPO/releases/latest/download/$asset"
     tmp="$(mktemp -d)"
-    trap 'rm -rf "$tmp"' RETURN
+    trap "rm -rf $tmp" RETURN
     echo "Downloading prebuilt binary ($asset)..."
     curl -fsSL "$url" -o "$tmp/pkg.tar.gz" || return 1
     tar -xzf "$tmp/pkg.tar.gz" -C "$tmp"
