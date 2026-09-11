@@ -1,12 +1,14 @@
 # AGENTS.md
 
-Rust CLI (`src/`, one module per pipeline stage) that downloads PDFs from
-academia.edu. Single binary, async tokio, concurrent multi-URL via `JoinSet`.
+Rust CLI + web UI (`src/`, one module per pipeline stage) that downloads PDFs
+from academia.edu and scribd.com. Two binaries (`academia-dl`, `academia-web`),
+async tokio, concurrent multi-URL via `JoinSet`.
 Full context in `CLAUDE.md`; design/plan history in `docs/superpowers/`.
 
 ## Commands
 
-- Build / run: `cargo build` / `cargo run -- "<url>"` (release: `cargo build --release`)
+- Build / run: `cargo build` / `cargo run --bin academia-dl -- "<url>"` (release: `cargo build --release`)
+- Web UI: `cargo run --bin academia-web` (paste academia.edu or scribd.com URL)
 - Unit tests (pure, no network): `cargo test`
 - Single test: `cargo test <name>` (e.g. `cargo test prefers_id_followed_by_identifier`)
 - Live e2e (network, works anonymously): `cargo test -- --ignored`
@@ -22,7 +24,7 @@ Full context in `CLAUDE.md`; design/plan history in `docs/superpowers/`.
 
 - `fetch.rs`: `wreq` `.emulation(...)` MUST precede `.default_headers(...)` (emulation overwrites them). Plain reqwest/curl 403 even with valid cookies — only Chrome-emulated TLS fingerprint passes Cloudflare.
 - `fetch.rs`: connect-only timeout. Never add a total request timeout; it kills slow large downloads mid-stream.
-- `main.rs`: one shared `indicatif::MultiProgress`; status lines via `mp.println`, never `eprintln` (glitches bars). Never `exit()` inside a `JoinSet` task — return `Err`, `main` collects and exits 1.
+- `main.rs`: one shared `indicatif::MultiProgress`; status lines via `mp.println`, never `eprintln` (glitches bars). Never `exit()` inside a `JoinSet` task — return `Err`, `main` collects and exits 1. Host dispatch lives in `process_one` (CLI) and `run_job`/`create_job` (web): scribd hosts → scribd path, else academia path.
 - `download.rs`: stream to `<name>.part`, rename on success, delete `.part` on error — otherwise a partial file is mistaken for "already exists, skipping".
 - `parse.rs`: `[{"id":` matches author entities too; the download entity is the one whose bounded context (capped at next `[{"id":`, else 600 chars) contains `"identifier"`. Prefer embedded `"downloadUrl"` when present (direct `attachments/<id>/download_file` link, logged-in pages). Debug with `ACADEMIA_DEBUG=1`.
 - `filename.rs`: sanitize `/` `\` `..` (the `url` crate percent-decodes; Ruby original didn't), truncate 251 chars + `.pdf`.

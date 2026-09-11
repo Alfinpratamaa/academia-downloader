@@ -11,7 +11,7 @@ use tokio::task::JoinSet;
 #[command(
     name = "academia-dl",
     version,
-    about = "Download PDFs from academia.edu without logging in"
+    about = "Download PDFs from academia.edu and scribd.com without logging in"
 )]
 struct Args {
     /// Cookie header value from a logged-in browser session
@@ -20,12 +20,48 @@ struct Args {
     #[arg(long, env = "ACADEMIA_COOKIES")]
     cookie: Option<String>,
 
-    /// One or more academia.edu URLs to download
+    /// One or more academia.edu / scribd.com URLs to download
     #[arg(required = true)]
     urls: Vec<String>,
 }
 
+fn host_of(input: &str) -> Option<String> {
+    url::Url::parse(input)
+        .ok()?
+        .host_str()
+        .map(|h| h.to_lowercase())
+}
+
 async fn process_one(
+    client: &wreq::Client,
+    mp: &indicatif::MultiProgress,
+    input: &str,
+) -> Result<()> {
+    match host_of(input) {
+        Some(h) if h == "scribd.com" || h.ends_with(".scribd.com") => {
+            process_scribd(client, mp, input).await
+        }
+        _ => process_academia(client, mp, input).await,
+    }
+}
+
+async fn process_scribd(
+    client: &wreq::Client,
+    mp: &indicatif::MultiProgress,
+    input: &str,
+) -> Result<()> {
+    let url = academia_dl::validate::validate_scribd_url(input)?;
+    let filename = filename_from_url(&url);
+    if tokio::fs::try_exists(&filename).await.unwrap_or(false) {
+        let _ = mp.println(format!("{filename} already exists, skipping"));
+        return Ok(());
+    }
+    let html = fetch_page_html(client, &url).await?;
+    academia_dl::scribd::download_scribd_pdf(client, Some(mp), None, &html, &filename).await?;
+    Ok(())
+}
+
+async fn process_academia(
     client: &wreq::Client,
     mp: &indicatif::MultiProgress,
     input: &str,

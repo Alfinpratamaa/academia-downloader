@@ -20,8 +20,8 @@ button { padding: .5rem 1rem; }
 <h1>academia-dl</h1>
 <noscript><p>JS/htmx CDN is required for this UI.</p></noscript>
 <form hx-post="/jobs" hx-target="#result" hx-swap="innerHTML">
-<label for="url">academia.edu URL</label>
-<input id="url" name="url" type="url" placeholder="https://www.academia.edu/…/Title" required>
+<label for="url">academia.edu / scribd.com URL</label>
+<input id="url" name="url" type="url" placeholder="https://www.academia.edu/…/Title or https://www.scribd.com/document/…/Title" required>
 <button type="submit">Download</button>
 </form>
 <div id="result"></div>

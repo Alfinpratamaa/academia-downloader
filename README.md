@@ -1,6 +1,9 @@
 # academia-dl
 
-Download PDFs from academia.edu without logging in or creating an account.
+Download PDFs from academia.edu and scribd.com without logging in or creating an account.
+
+Scribd documents are reconstructed page-by-page (each page image is
+downloaded anonymously and embedded into a single PDF, one page per image).
 
 ## Prerequisites
 
@@ -35,12 +38,13 @@ then run:
 
 ```bash
 ./target/release/academia-dl "https://www.academia.edu/rest/of/url"
+./target/release/academia-dl "https://www.scribd.com/document/519991367/ISO-5807-1985"
 ```
 
-Multiple URLs download concurrently, each with its own progress bar:
+Multiple URLs (either host) download concurrently, each with its own progress bar:
 
 ```bash
-academia-dl "https://www.academia.edu/url/one" "https://www.academia.edu/url/two"
+academia-dl "https://www.academia.edu/url/one" "https://www.scribd.com/document/..."
 ```
 
 Or install once: `cargo install --path .`

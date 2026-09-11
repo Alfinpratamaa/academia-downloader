@@ -8,7 +8,7 @@ use academia_dl::download::{download_to_file, download_url, ProgressUpdate};
 use academia_dl::fetch::{build_client, fetch_page_html};
 use academia_dl::filename::filename_from_url;
 use academia_dl::parse::{extract_download_id, extract_download_url};
-use academia_dl::validate::validate_academia_url;
+use academia_dl::validate::{validate_academia_url, validate_scribd_url};
 use axum::extract::{Path, State};
 use axum::http::{header, StatusCode};
 use axum::middleware::{self, Next};
@@ -154,7 +154,16 @@ async fn create_job(
     State(state): State<Arc<AppState>>,
     Form(form): Form<JobForm>,
 ) -> Result<impl IntoResponse, (StatusCode, Html<String>)> {
-    let url = validate_academia_url(&form.url).map_err(|e| {
+    let host = url::Url::parse(&form.url)
+        .ok()
+        .and_then(|u| u.host_str().map(|h| h.to_lowercase()))
+        .unwrap_or_default();
+    let url = if host == "scribd.com" || host.ends_with(".scribd.com") {
+        validate_scribd_url(&form.url)
+    } else {
+        validate_academia_url(&form.url)
+    }
+    .map_err(|e| {
         (
             StatusCode::BAD_REQUEST,
             Html(err_fragment(&format!("{e:?}"))),
@@ -220,6 +229,12 @@ async fn run_job(
     tx: mpsc::Sender<ProgressUpdate>,
 ) -> anyhow::Result<()> {
     eprintln!("job starting: {url} -> {path}");
+    let host = url.host_str().unwrap_or("").to_lowercase();
+    if host == "scribd.com" || host.ends_with(".scribd.com") {
+        let html = fetch_page_html(client, url).await?;
+        academia_dl::scribd::download_scribd_pdf(client, None, Some(tx), &html, path).await?;
+        return Ok(());
+    }
     let html = fetch_page_html(client, url).await?;
     if let Some(direct) = extract_download_url(&html) {
         download_to_file(client, None, Some(tx), &direct, path).await?;
