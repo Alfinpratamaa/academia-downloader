@@ -40,6 +40,13 @@ pub fn extract_page_jsonp_urls(html: &str) -> Result<Vec<String>> {
         })
         .collect();
     if pages.is_empty() {
+        if html.contains("Client Challenge") || html.contains("_fs-ch") {
+            bail!(
+                "scribd served a bot-challenge page instead of the document (this IP is flagged). \
+                Open the URL in a real browser, then re-run with cookies from that session: \
+                academia-dl --cookie \"$(...)\" <url> (or export ACADEMIA_COOKIES)"
+            );
+        }
         bail!("could not find scribd page JSONP URLs in page HTML");
     }
     pages.sort_by_key(|(n, _)| *n);
@@ -379,6 +386,15 @@ var p3 = {contentUrl: "https://html.scribdassets.com/abc/pages/10-aaa.jsonp"};
     #[test]
     fn errors_when_no_jsonp_urls() {
         assert!(extract_page_jsonp_urls("<html><body>hi</body></html>").is_err());
+    }
+
+    #[test]
+    fn challenge_page_suggests_cookies() {
+        let err = extract_page_jsonp_urls(
+            "<html><head><title>Client Challenge</title></head><body id=\"_fs-ch\"></body></html>",
+        )
+        .unwrap_err();
+        assert!(format!("{err:?}").contains("--cookie"), "got: {err:?}");
     }
 
     const JSONP_ESCAPED: &str = r#"window.page1_callback(["<div><img orig=\"http://html.scribd.com/abc/images/1-xyz.jpg\"/></div>"]);"#;

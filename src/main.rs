@@ -25,6 +25,16 @@ struct Args {
     urls: Vec<String>,
 }
 
+/// Report a failure line: via the progress UI on a TTY, via stderr when
+/// output is piped (indicatif swallows `mp.println` when hidden).
+fn report(mp: &indicatif::MultiProgress, msg: String) {
+    if mp.is_hidden() {
+        eprintln!("{msg}");
+    } else {
+        let _ = mp.println(msg);
+    }
+}
+
 fn host_of(input: &str) -> Option<String> {
     url::Url::parse(input)
         .ok()?
@@ -109,13 +119,14 @@ async fn main() {
             Ok((_, Ok(()))) => {}
             Ok((input, Err(e))) => {
                 failed = true;
-                let _ = mp.println(format!(
-                    "Error parsing/downloading file for URL {input}: {e:?}"
-                ));
+                report(
+                    &mp,
+                    format!("Error parsing/downloading file for URL {input}: {e:?}"),
+                );
             }
             Err(e) => {
                 failed = true;
-                let _ = mp.println(format!("task failed: {e:?}"));
+                report(&mp, format!("task failed: {e:?}"));
             }
         }
     }
