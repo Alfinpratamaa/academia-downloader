@@ -2,7 +2,8 @@
 # academia-dl one-line installer.
 # Usage: curl -fsSL https://raw.githubusercontent.com/Alfinpratamaa/academia-downloader/main/install.sh | sudo bash
 #
-# Prefers a prebuilt binary from the latest GitHub release (seconds).
+# Prefers prebuilt binaries from the latest GitHub release (seconds):
+# academia-dl (CLI) + academia-web (web UI).
 # Falls back to a local docker build when no release asset fits.
 set -euo pipefail
 
@@ -11,6 +12,7 @@ REPO_URL="${REPO_URL:-https://github.com/$REPO.git}"
 INSTALL_DIR="${INSTALL_DIR:-/opt/academia-dl}"
 IMAGE="${IMAGE:-academia-dl}"
 BIN_PATH="${BIN_PATH:-/usr/local/bin/academia-dl}"
+WEB_BIN_PATH="${WEB_BIN_PATH:-/usr/local/bin/academia-web}"
 
 if [ "$(id -u)" -ne 0 ]; then
     echo "Re-running with sudo..." >&2
@@ -30,14 +32,16 @@ install_base_tools() {
 
 arch_asset() {
     case "$(uname -m)" in
-        x86_64|amd64) echo "academia-dl-x86_64-unknown-linux-gnu.tar.gz" ;;
+        x86_64|amd64) echo "$1-x86_64-unknown-linux-gnu.tar.gz" ;;
         *) echo "" ;;
     esac
 }
 
 install_binary() {
-    local asset url tmp
-    asset="$(arch_asset)"
+    local name dest asset url tmp
+    name="$1"
+    dest="$2"
+    asset="$(arch_asset "$name")"
     [ -n "$asset" ] || return 1
     url="https://github.com/$REPO/releases/latest/download/$asset"
     tmp="$(mktemp -d)"
@@ -45,9 +49,14 @@ install_binary() {
     echo "Downloading prebuilt binary ($asset)..."
     curl -fsSL "$url" -o "$tmp/pkg.tar.gz" || return 1
     tar -xzf "$tmp/pkg.tar.gz" -C "$tmp"
-    install -m 0755 "$tmp/academia-dl" "$BIN_PATH"
-    echo "Installed: $("$BIN_PATH" --version 2>/dev/null || echo academia-dl)"
+    install -m 0755 "$tmp/$name" "$dest"
+    echo "Installed: $("$dest" --version 2>/dev/null || echo "$name")"
     return 0
+}
+
+install_binaries() {
+    install_binary academia-dl "$BIN_PATH" || return 1
+    install_binary academia-web "$WEB_BIN_PATH" || return 1
 }
 
 install_docker() {
@@ -104,7 +113,7 @@ EOF
 }
 
 install_base_tools
-if ! install_binary; then
+if ! install_binaries; then
     install_docker
     start_docker
     install_via_docker
